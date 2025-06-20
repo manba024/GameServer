@@ -1,5 +1,4 @@
-#include "timer.h"
-#include <iostream>
+#include "timer_wheel.h"
 #include <chrono>
 
 namespace GameTimer {
@@ -62,7 +61,6 @@ void TimerWheel::tick() {
     auto &slotList = slots_[curSlot_];
     for (auto it = slotList.begin(); it != slotList.end(); ) {
         if (it->rotations == 0) {
-            // 到期，执行回调
             it->cb();
             idMap_.erase(it->id);
             it = slotList.erase(it);
