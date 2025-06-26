@@ -50,10 +50,6 @@ private:
         std::atomic<bool> idle{true};
         
         WorkerInfo() = default;
-        WorkerInfo(WorkerInfo&& other) noexcept 
-            : thread(std::move(other.thread)), 
-              lastActiveTime(other.lastActiveTime),
-              idle(other.idle.load()) {}
     };
     
     std::vector<std::unique_ptr<WorkerInfo>> workers_;

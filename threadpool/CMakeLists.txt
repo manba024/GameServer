@@ -15,6 +15,7 @@ include_directories(include)
 set(SOURCES
     src/thread_pool.cpp
     src/fixed_thread_pool.cpp
+    src/cached_thread_pool.cpp
     src/priority_thread_pool.cpp
     src/thread_pool_factory.cpp
 )
