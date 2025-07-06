@@ -348,20 +348,23 @@ std::vector<double> SortFactory<double>::TestDataGenerator::randomData(size_t si
     return data;
 }
 
+// string类型特化版本
 template<>
 std::vector<std::string> SortFactory<std::string>::TestDataGenerator::randomData(size_t size, std::string minVal, std::string maxVal) {
+    (void)minVal; (void)maxVal; // 避免未使用参数警告
     std::vector<std::string> data;
     data.reserve(size);
     
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> dis(0, 25);
+    std::uniform_int_distribution<> dis(65, 90); // A-Z
+    std::uniform_int_distribution<> len_dis(3, 8); // 字符串长度3-8
     
-    for (size_t i = 0; i < size; i++) {
+    for(size_t i = 0; i < size; ++i) {
         std::string str;
-        int len = 3 + (gen() % 8); // 3-10个字符
-        for (int j = 0; j < len; j++) {
-            str += static_cast<char>('a' + dis(gen));
+        int len = len_dis(gen);
+        for(int j = 0; j < len; ++j) {
+            str += static_cast<char>(dis(gen));
         }
         data.push_back(str);
     }
@@ -373,7 +376,7 @@ std::vector<std::string> SortFactory<std::string>::TestDataGenerator::randomData
 template<typename T>
 std::vector<T> SortFactory<T>::TestDataGenerator::randomData(size_t size, T minVal, T maxVal) {
     // 对于未特化的类型，返回空向量
-    (void)minVal; (void)maxVal; // 避免未使用参数警告
+    (void)size; (void)minVal; (void)maxVal; // 避免未使用参数警告
     return std::vector<T>();
 }
 

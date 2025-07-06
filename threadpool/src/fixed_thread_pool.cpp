@@ -168,11 +168,13 @@ ThreadPoolConfig FixedThreadPool::getConfig() const {
 }
 
 bool FixedThreadPool::setCorePoolSize(size_t coreSize) {
+    (void)coreSize; // 消除未使用参数警告
     // 固定线程池不支持动态调整
     return false;
 }
 
 bool FixedThreadPool::setMaximumPoolSize(size_t maxSize) {
+    (void)maxSize; // 消除未使用参数警告
     // 固定线程池不支持动态调整
     return false;
 }

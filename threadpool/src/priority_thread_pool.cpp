@@ -175,10 +175,12 @@ ThreadPoolConfig PriorityThreadPool::getConfig() const {
 }
 
 bool PriorityThreadPool::setCorePoolSize(size_t coreSize) {
+    (void)coreSize; // 消除未使用参数警告
     return false; // 不支持动态调整
 }
 
 bool PriorityThreadPool::setMaximumPoolSize(size_t maxSize) {
+    (void)maxSize; // 消除未使用参数警告
     return false; // 不支持动态调整
 }
 
@@ -257,27 +259,57 @@ void PriorityThreadPool::workerThread(size_t threadId) {
 }
 
 bool PriorityThreadPool::handleRejection(const Task& task, int priority) {
+    (void)priority; // 消除未使用参数警告
     ++rejectedTasks_;
     
     switch (rejectionPolicy_) {
         case RejectionPolicy::Abort:
-            throw std::runtime_error("优先级任务被拒绝：队列已满");
+            throw std::runtime_error("任务被拒绝：队列已满");
             
         case RejectionPolicy::Discard:
-            std::cerr << "优先级任务被丢弃：队列已满" << std::endl;
+            std::cerr << "任务被丢弃：队列已满" << std::endl;
+            return false;
+            
+        case RejectionPolicy::DiscardOldest:
+            {
+                std::unique_lock<std::mutex> lock(queueMutex_);
+                if (!taskQueue_.empty()) {
+                    taskQueue_.pop(); // 丢弃最高优先级的任务
+                    taskQueue_.emplace(task, priority);
+                    lock.unlock();
+                    condition_.notify_one();
+                    return true;
+                }
+            }
             return false;
             
         case RejectionPolicy::CallerRuns:
             try {
-                task();
+                task(); // 在调用者线程中执行
                 return true;
             } catch (...) {
                 return false;
             }
             
-        default:
-            return false;
+        case RejectionPolicy::Block:
+            {
+                std::unique_lock<std::mutex> lock(queueMutex_);
+                condition_.wait(lock, [this] { 
+                    return shutdown_.load() || taskQueue_.size() < config_.maxQueueSize; 
+                });
+                
+                if (shutdown_.load()) {
+                    return false;
+                }
+                
+                taskQueue_.emplace(task, priority);
+                lock.unlock();
+                condition_.notify_one();
+                return true;
+            }
     }
+    
+    return false;
 }
 
 void PriorityThreadPool::recordTaskExecution(double executionTime, int priority) {

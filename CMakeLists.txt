@@ -22,6 +22,7 @@ endif()
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_EXAMPLES "Build example programs" ON)
 option(BUILD_BENCHMARKS "Build benchmark programs" OFF)
+option(BUILD_WEBSERVER "Build WebServer component" ON)
 
 # 核心基础库
 add_subdirectory(io_multiplexing)
@@ -40,7 +41,9 @@ add_subdirectory(leaderboard)
 add_subdirectory(distributed_id)
 
 # Web服务器和协程（可选）
-# add_subdirectory(webserver)
+if(BUILD_WEBSERVER)
+    add_subdirectory(webserver)
+endif()
 # add_subdirectory(coroutine)
 
 # 全局安装配置
@@ -55,6 +58,7 @@ message(STATUS "  Compiler: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "  Build Tests: ${BUILD_TESTS}")
 message(STATUS "  Build Examples: ${BUILD_EXAMPLES}")
 message(STATUS "  Build Benchmarks: ${BUILD_BENCHMARKS}")
+message(STATUS "  Build WebServer: ${BUILD_WEBSERVER}")
 
 # 子项目依赖关系说明
 message(STATUS "")
@@ -67,7 +71,11 @@ message(STATUS "  ✅ string_utils - 字符串工具")
 message(STATUS "  ✅ rpc_framework - 高性能RPC框架 (TCP/HTTP/UDP + JSON/Binary/MessagePack)")
 message(STATUS "  ✅ leaderboard - 排行榜系统")
 message(STATUS "  ✅ distributed_id - 分布式ID生成器")
-message(STATUS "  ⏸️  webserver - Web服务器 (待启用)")
+if(BUILD_WEBSERVER)
+    message(STATUS "  ✅ webserver - Web服务器 (已启用)")
+else()
+    message(STATUS "  ⏸️  webserver - Web服务器 (已禁用)")
+endif()
 message(STATUS "  ⏸️  coroutine - 协程库 (待启用)")
 
 # CPack配置
